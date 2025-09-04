@@ -34,3 +34,5 @@ GET /api/owners?search=dan&isLocked=false&page=1&limit=5&sortBy=name&order=asc
 */
 export const getAllOwners = () => API.get(`/api/owner/`)
 export const fetchAllOwners = (params) => API.get(`/api/owner/all`, { params })
+export const getOwner = (id) => API.get(`/api/owner/${id}`)
+export const updateOwner = (id, data) => API.put(`/api/owner/${id}`, data);

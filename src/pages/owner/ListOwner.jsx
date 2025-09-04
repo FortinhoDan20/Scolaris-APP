@@ -12,9 +12,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
 import { fetchAll } from "../../feautres/owner/ownerSlice";
 import { Listbox } from "@headlessui/react";
-import EditOwner from "./modal/EditOwner";
-import AddOwner from "./modal/AddOwner";
-import DetailsOwner from "./modal/DetailsOwner";
 
 const sortFieldOptions = [
   { value: "createdAt", label: "Date de création" },
@@ -26,7 +23,7 @@ const ListOwner = () => {
   const { owners, page, totalPages, loading, error } = useSelector(
     (state) => state.owner
   );
-  
+
   const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -108,9 +105,9 @@ const ListOwner = () => {
         {/* Actions */}
         <div className="grid grid-flow-col sm:auto-cols-max justify-start sm:justify-end gap-2">
           <button
-            onClick={() => setOpenModal(true)}
+            onClick={() => navigate(`/add-owner/`)}
             className="btn bg-sky-900 text-gray-100 hover:bg-green-800 float-end mt-2 mx-5 py-2 px-4 rounded-lg flex items-center"
-          >
+        >
             <FilePlus2 />
             <span className="ml-2">Nouveau</span>
           </button>
@@ -118,9 +115,16 @@ const ListOwner = () => {
       </div>
 
       {/* === Modal === */}
-      {openModal && <AddOwner setOpenModal={setOpenModal} />}
-       {openModalEdit && <EditOwner setOpenModalEdit={setOpenModalEdit} id={selectedOwnerId} />}
-       {openModalDetails && <DetailsOwner setOpenModalDetails={setOpenModalDetails} id={selectedOwnerId} />}
+      {/*       {openModal && <AddOwner setOpenModal={setOpenModal} />}
+      {openModalEdit && (
+        <EditOwner setOpenModalEdit={setOpenModalEdit} id={selectedOwnerId} />
+      )}
+      {openModalDetails && (
+        <DetailsOwner
+          setOpenModalDetails={setOpenModalDetails}
+          id={selectedOwnerId}
+        />
+      )} */}
 
       {owners?.length > 0 ? (
         <div className="col-span-full xl:col-span-8 bg-white dark:bg-gray-800 shadow-sm rounded-xl">
@@ -204,18 +208,22 @@ const ListOwner = () => {
                       <td className="p-2">
                         <div className="flex justify-center space-x-2">
                           <Pencil
-            className="cursor-pointer text-blue-600"
-            onClick={() => {
-              setSelectedOwnerId(item._id); // on stocke l'id du owner
-              setOpenModalEdit(true); // on ouvre le modal édition
-            }}
-          />
+                            className="cursor-pointer text-blue-600"
+                            /*    onClick={() => {
+                              setSelectedOwnerId(item._id); // on stocke l'id du owner
+                              setOpenModalEdit(true); // on ouvre le modal édition
+                            }} */
+                            onClick={() => navigate(`/edit-owner/${item._id}`)}
+                          />
                           <Eye
                             className="cursor-pointer text-green-600"
-                            onClick={() => {
-              setSelectedOwnerId(item._id); // on stocke l'id du owner
-              setOpenModalDetails(true); // on ouvre le modal édition
-            }}
+                            /* onClick={() => {
+                              setSelectedOwnerId(item._id); // on stocke l'id du owner
+                              setOpenModalDetails(true); // on ouvre le modal édition
+                            }} */
+                            onClick={() =>
+                              navigate(`/details-owner/${item._id}`)
+                            }
                           />
                           {item.isLocked === true ? (
                             <LockOpen

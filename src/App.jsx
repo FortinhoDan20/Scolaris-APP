@@ -17,6 +17,8 @@ import Forbidden403 from "./pages/errors/Forbidden403";
 import Owner from "./pages/owner/Owner";
 import ListOwner from "./pages/owner/ListOwner";
 import AddOwner from "./pages/owner/AddOwner";
+import DetailsOwner from "./pages/owner/modal/DetailsOwner";
+import EditOwner from "./pages/owner/modal/EditOwner";
 
 function App() {
   const location = useLocation();
@@ -43,6 +45,9 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="/list-users" element={<PrivateRoute ><ListOwner /></PrivateRoute>}/>
           <Route path="/new-owner" element={<PrivateRoute ><AddOwner /></PrivateRoute>}/>
+           <Route path="/details-owner/:id" element={<PrivateRoute ><DetailsOwner /></PrivateRoute>}/>
+           <Route path="/edit-owner/:id" element={<PrivateRoute ><EditOwner /></PrivateRoute>}/>
+           <Route path="/add-owner/" element={<PrivateRoute ><AddOwner /></PrivateRoute>}/>
         </Route>
         <Route path="/403" element={<Forbidden403 />} />
         <Route path="/login" element={<SignIn />}></Route>
