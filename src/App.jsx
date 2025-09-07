@@ -19,6 +19,9 @@ import ListOwner from "./pages/owner/ListOwner";
 import AddOwner from "./pages/owner/AddOwner";
 import DetailsOwner from "./pages/owner/modal/DetailsOwner";
 import EditOwner from "./pages/owner/modal/EditOwner";
+import AddPromoter from "./pages/promoter/AddPromoter";
+import Promoter from "./pages/promoter/Promoter";
+import TabSchool from "./pages/school/TabSchool";
 
 function App() {
   const location = useLocation();
@@ -48,6 +51,9 @@ function App() {
            <Route path="/details-owner/:id" element={<PrivateRoute ><DetailsOwner /></PrivateRoute>}/>
            <Route path="/edit-owner/:id" element={<PrivateRoute ><EditOwner /></PrivateRoute>}/>
            <Route path="/add-owner/" element={<PrivateRoute ><AddOwner /></PrivateRoute>}/>
+           <Route path="/new-promoter/" element={<PrivateRoute ><AddPromoter /></PrivateRoute>}/>
+           <Route path="/list-promoter/" element={<PrivateRoute ><Promoter /></PrivateRoute>}/>
+           <Route path="/details-school/" element={<PrivateRoute ><TabSchool /></PrivateRoute>}/>
         </Route>
         <Route path="/403" element={<Forbidden403 />} />
         <Route path="/login" element={<SignIn />}></Route>

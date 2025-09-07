@@ -2,23 +2,10 @@ import React, { useState, useEffect } from 'react';
 import Tooltip from '../../components/Tooltip';
 import { chartAreaGradient } from '../../charts/ChartjsConfig';
 import RealtimeChart from '../../charts/RealtimeChart';
-
-// Import utilities
 import { adjustColorOpacity, getCssVariable } from '../../utils/Utils';
 
 function DashboardCard05() {
-
-  // IMPORTANT:
-  // Code below is for demo purpose only, and it's not covered by support.
-  // If you need to replace dummy data with real data,
-  // refer to Chart.js documentation: https://www.chartjs.org/docs/latest
-
-  // Fake real-time data
-  const [counter, setCounter] = useState(0);
-  const [increment, setIncrement] = useState(0);
-  const [range, setRange] = useState(35);
-  
-  // Dummy data to be looped
+  // Données fictives
   const data = [
     57.81, 57.75, 55.48, 54.28, 53.14, 52.25, 51.04, 52.49, 55.49, 56.87,
     53.73, 56.42, 58.06, 55.62, 58.16, 55.22, 58.67, 60.18, 61.31, 63.25,
@@ -28,57 +15,46 @@ function DashboardCard05() {
     50.62, 56.28, 57.37, 53.08, 55.94, 55.82, 53.94, 52.65, 50.25,
   ];
 
+  const range = 35; // Nombre de points visibles
+  const [increment, setIncrement] = useState(0);
+
+  // Initialisation des slices
   const [slicedData, setSlicedData] = useState(data.slice(0, range));
+  const [slicedLabels, setSlicedLabels] = useState(
+    Array(range).fill(0).map((_, i) => new Date(Date.now() - (range - i) * 2000))
+  );
 
-  // Generate fake dates from now to back in time
-  const generateDates = () => {
-    const now = new Date();
-    const dates = [];
-    data.forEach((v, i) => {
-      dates.push(new Date(now - 2000 - i * 2000));
-    });
-    return dates;
-  };
-
-  const [slicedLabels, setSlicedLabels] = useState(generateDates().slice(0, range).reverse());
-
-  // Fake update every 2 seconds
+  // Timer pour incrémenter le graphique toutes les 2 secondes
   useEffect(() => {
     const interval = setInterval(() => {
-      setCounter(counter + 1);
+      setIncrement(prev => prev + 1);
     }, 2000);
-    return () => clearInterval(interval)
-  }, [counter]);
+    return () => clearInterval(interval);
+  }, []);
 
-  // Loop through data array and update
+  // Mise à jour des données et labels
   useEffect(() => {
-    setIncrement(increment + 1);
-    if (increment + range < data.length) {
-      setSlicedData(([x, ...slicedData]) => [...slicedData, data[increment + range]]);
-    } else {
-      setIncrement(0);
-      setRange(0);
-    }
-    setSlicedLabels(([x, ...slicedLabels]) => [...slicedLabels, new Date()]);
-    return () => setIncrement(0)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [counter]);
+    setSlicedData(prev => {
+      const nextIndex = (increment + range) % data.length;
+      return [...prev.slice(1), data[nextIndex]];
+    });
+    setSlicedLabels(prev => [...prev.slice(1), new Date()]);
+  }, [increment]);
 
   const chartData = {
     labels: slicedLabels,
     datasets: [
-      // Indigo line
       {
         data: slicedData,
         fill: true,
         backgroundColor: function(context) {
           const chart = context.chart;
-          const {ctx, chartArea} = chart;
+          const { ctx, chartArea } = chart;
           return chartAreaGradient(ctx, chartArea, [
             { stop: 0, color: adjustColorOpacity(getCssVariable('--color-violet-500'), 0) },
             { stop: 1, color: adjustColorOpacity(getCssVariable('--color-violet-500'), 0.2) }
           ]);
-        },       
+        },
         borderColor: getCssVariable('--color-violet-500'),
         borderWidth: 2,
         pointRadius: 0,
@@ -86,8 +62,7 @@ function DashboardCard05() {
         pointBackgroundColor: getCssVariable('--color-violet-500'),
         pointHoverBackgroundColor: getCssVariable('--color-violet-500'),
         pointBorderWidth: 0,
-        pointHoverBorderWidth: 0,          
-        clip: 20,
+        pointHoverBorderWidth: 0,
         tension: 0.2,
       },
     ],
@@ -98,11 +73,11 @@ function DashboardCard05() {
       <header className="px-5 py-4 border-b border-gray-100 dark:border-gray-700/60 flex items-center">
         <h2 className="font-semibold text-gray-800 dark:text-gray-100">Real Time Value</h2>
         <Tooltip className="ml-2">
-          <div className="text-xs text-center whitespace-nowrap">Built with <a className="underline" href="https://www.chartjs.org/" target="_blank" rel="noreferrer">Chart.js</a></div>
+          <div className="text-xs text-center whitespace-nowrap">
+            Built with <a className="underline" href="https://www.chartjs.org/" target="_blank" rel="noreferrer">Chart.js</a>
+          </div>
         </Tooltip>
       </header>
-      {/* Chart built with Chart.js 3 */}
-      {/* Change the height attribute to adjust the chart height */}
       <RealtimeChart data={chartData} width={595} height={248} />
     </div>
   );

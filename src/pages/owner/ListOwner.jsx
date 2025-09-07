@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
-import { fetchAll } from "../../feautres/owner/ownerSlice";
+import { fetchAll, lockAnUnlockOwner } from "../../feautres/owner/ownerSlice";
 import { Listbox } from "@headlessui/react";
 
 const sortFieldOptions = [
@@ -60,6 +60,11 @@ const ListOwner = () => {
     setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
   };
 
+  //toggle lock and unlock owner
+  const toogleOwner = (id) => {
+    dispatch(lockAnUnlockOwner(id))
+  //  console.log("toogle owner id:", id)
+  }
   if (loading) {
     return (
       <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center z-10">
@@ -194,6 +199,7 @@ const ListOwner = () => {
                     <th className="p-2 text-left">Nom</th>
                     <th className="p-2 text-center">Identifiant</th>
                     <th className="p-2 text-center">Rôle utilisateur</th>
+                    <th className="p-2 text-center">Status</th>
                     <th className="p-2 text-center">Actions</th>
                   </tr>
                 </thead>
@@ -204,6 +210,7 @@ const ListOwner = () => {
                       <td className="p-2">{item.name}</td>
                       <td className="p-2 text-center">{item.username}</td>
                       <td className="p-2 text-center">{item.role}</td>
+                      <td className="p-2 text-center">{item.isLocked == true ?(<span className=" text-red-600">Désactivé</span>) : (<span className=" text-green-800">Actif</span>)}</td>
 
                       <td className="p-2">
                         <div className="flex justify-center space-x-2">
@@ -216,7 +223,7 @@ const ListOwner = () => {
                             onClick={() => navigate(`/edit-owner/${item._id}`)}
                           />
                           <Eye
-                            className="cursor-pointer text-green-600"
+                            className="cursor-pointer text-yellow-600"
                             /* onClick={() => {
                               setSelectedOwnerId(item._id); // on stocke l'id du owner
                               setOpenModalDetails(true); // on ouvre le modal édition
@@ -225,17 +232,18 @@ const ListOwner = () => {
                               navigate(`/details-owner/${item._id}`)
                             }
                           />
-                          {item.isLocked === true ? (
+                          {item.isLocked == true ? (
                             <LockOpen
                               onClick={() =>
-                                navigate(`/toggle-owner/${item._id}`)
+                               toogleOwner(item._id)
                               }
                               className="cursor-pointer text-red-600"
                             />
                           ) : (
                             <LockOpen
                               onClick={() =>
-                                navigate(`/toggle-owner/${item._id}`)
+                                toogleOwner(item._id)
+                               
                               }
                               className="cursor-pointer text-green-600"
                             />

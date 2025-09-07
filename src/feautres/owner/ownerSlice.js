@@ -2,6 +2,21 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import * as api from "../api";
 import { toast } from "react-toastify";
 
+export const addOwner = createAsyncThunk(
+  "add/owner",
+  async ({ formData, navigate, toast }, { rejectWithValaue }) => {
+    const response = await api.addNewOnwer(formData);
+
+    if (response) {
+      toast.success(response.data.message);
+      return response.data;
+    } else {
+      toast.error(response.error);
+      return rejectWithValaue(error.message);
+    }
+  }
+);
+
 // 📌 Récupérer tous les propriétaires (sans pagination, simple liste)
 export const getAllOwners = createAsyncThunk(
   "owners/all",
@@ -57,15 +72,32 @@ export const getOwner = createAsyncThunk(
   }
 );
 // === Ajoute cette action ===
-export const updateOwner = createAsyncThunk(
-  "owners/update",
-  async ({ id, fromValue }, { rejectWithValue }) => {
-    try {
-      const response = await api.updateOwner(id, fromValue);
-      console.log("update response:", response.data);
+
+export const ownerUpdated = createAsyncThunk(
+  "upadteed/owner",
+  async ({ id, formData }, { rejectWithValaue }) => {
+    const response = await api.updateOwner(formData, id);
+
+    if (response) {
+      // toast.success(response.data.message )
       return response.data;
-    } catch (error) {
-      return rejectWithValue(error.response?.data || "Erreur serveur");
+    } else {
+      toast.error(response.error);
+      return rejectWithValaue(error.message);
+    }
+  }
+);
+export const lockAnUnlockOwner = createAsyncThunk(
+  "toogle/lockAdUnlock/owner",
+  async (id, { rejectWithValaue }) => {
+    const response = await api.toogleOwner(id);
+
+    if (response) {
+    // toast.success(response.data.message )
+      return response.data;
+    } else {
+      toast.error(response.error);
+      return rejectWithValaue(error.message);
     }
   }
 );
@@ -141,10 +173,10 @@ const ownerSlice = createSlice({
         toast.error(state.error);
       })
       // === updateOwner ===
-      .addCase(updateOwner.pending, (state) => {
+      .addCase(ownerUpdated.pending, (state) => {
         state.loading = true;
       })
-      .addCase(updateOwner.fulfilled, (state, action) => {
+      .addCase(ownerUpdated.fulfilled, (state, action) => {
         state.loading = false;
         state.owner = action.payload.owner || action.payload;
 
@@ -157,7 +189,48 @@ const ownerSlice = createSlice({
         // ✅ Notification succès
         toast.success("Propriétaire mis à jour avec succès !");
       })
-      .addCase(updateOwner.rejected, (state, action) => {
+      .addCase(ownerUpdated.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || action.error.message || "Whoops!";
+        toast.error(state.error);
+      })
+      // === add new owner ===
+      .addCase(addOwner.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(addOwner.fulfilled, (state, action) => {
+        state.loading = false;
+        state.owner = action.payload.owner || action.payload;
+
+        // Met à jour la liste locale si besoin
+        const index = state.owners.findIndex((o) => o._id === state.owner._id);
+        if (index !== -1) {
+          state.owners[index] = state.owner;
+        }
+      })
+      .addCase(addOwner.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || action.error.message || "Whoops!";
+        toast.error(state.error);
+      })
+      // === toggle Owner ===
+      .addCase(lockAnUnlockOwner.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(lockAnUnlockOwner.fulfilled, (state, action) => {
+        state.loading = false;
+        state.owner = action.payload.owner || action.payload;
+
+        // Met à jour la liste locale si besoin
+        const index = state.owners.findIndex((o) => o._id === state.owner._id);
+        if (index !== -1) {
+          state.owners[index] = state.owner;
+        }
+
+        // ✅ Notification succès
+        toast.success(action.payload.message);
+      })
+      .addCase(lockAnUnlockOwner.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message || "Whoops!";
         toast.error(state.error);
