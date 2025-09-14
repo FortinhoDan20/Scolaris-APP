@@ -1,58 +1,62 @@
-import React, { useEffect, useState } from "react";
 import {
+  FilePlus2,
   ChevronsUpDown,
   Eye,
-  FilePlus2,
   LockOpen,
   Pencil,
   Save,
-  X,
 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { NavLink, useNavigate, useParams } from "react-router-dom";
-import { fetchAll, lockAnUnlockOwner } from "../../feautres/owner/ownerSlice";
+import { fetchAllPromoters } from "../../feautres/promoter/promoterSlice";
 import { Listbox } from "@headlessui/react";
 
-const sortFieldOptions = [
-  { value: "createdAt", label: "Date de création" },
-  { value: "name", label: "Nom" },
-  { value: "username", label: "Identifiant" },
-  { value: "role", label: "Rôle" },
+const genders = [
+  { value: "all", label: "Tous" },
+  { value: "M", label: "Hommes" },
+  { value: "F", label: "Femmes" },
 ];
-const ListOwner = () => {
-  const { owners, page, totalPages, loading, error } = useSelector(
-    (state) => state.owner
-  );
 
-  const { id } = useParams();
+const sortFields = [
+  { value: "createdAt", label: "Date" },
+  { value: "name", label: "Nom" },
+  { value: "lastname", label: "Prénom" },
+];
+
+
+
+const Promoter = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [openModal, setOpenModal] = useState(false);
-  const [openModalEdit, setOpenModalEdit] = useState(false);
-  const [openModalDetails, setOpenModalDetails] = useState(false);
-  const [selectedOwnerId, setSelectedOwnerId] = useState(null);
-  // États locaux
-  const [search, setSearch] = useState("");
-  const [sortField, setSortField] = useState(sortFieldOptions[0]);
-  const [sortOrder, setSortOrder] = useState("desc");
 
-  // Charger la liste
+  const [search, setSearch] = useState("");
+  const [gender, setGender] = useState(genders[0]);
+  const [sortField, setSortField] = useState(sortFields[0]);
+  const [sortOrder, setSortOrder] = useState("asc");
+  const { page, totalPages, loading, error, promoters } = useSelector(
+    (state) => state.promoter
+  );
+
   useEffect(() => {
     dispatch(
-      fetchAll({
-        page: 1,
-        limit: 10,
+      fetchAllPromoters({
+        page,
+        limit: 5,
         search,
-        sortField: sortField.value, // on passe seulement la "value"
+        gender: gender?.value || "all",
+        sortField,
         sortOrder,
       })
     );
-  }, [dispatch, sortField, sortOrder]);
+  }, [dispatch, page, search, gender, sortField, sortOrder]);
 
   // Recherche
   const handleSearch = (e) => {
     e.preventDefault();
-    dispatch(fetchAll({ page: 1, limit: 10, search, sortField, sortOrder }));
+    dispatch(
+      fetchAllPromoters({ page: 1, limit: 10, search, sortField, sortOrder })
+    );
   };
 
   // Toggle ordre
@@ -60,11 +64,6 @@ const ListOwner = () => {
     setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
   };
 
-  //toggle lock and unlock owner
-  const toogleOwner = (id) => {
-    dispatch(lockAnUnlockOwner(id))
-  //  console.log("toogle owner id:", id)
-  }
   if (loading) {
     return (
       <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center z-10">
@@ -103,7 +102,7 @@ const ListOwner = () => {
         {/* Title */}
         <div className="mb-4 sm:mb-0">
           <h1 className="text-2xl md:text-3xl text-sky-800 dark:text-gray-100 font-bold">
-            Liste des Utilisateursx
+            Liste des Promoteurs
           </h1>
         </div>
 
@@ -112,26 +111,14 @@ const ListOwner = () => {
           <button
             onClick={() => navigate(`/add-owner/`)}
             className="btn bg-sky-900 text-gray-100 hover:bg-green-800 float-end mt-2 mx-5 py-2 px-4 rounded-lg flex items-center"
-        >
+          >
             <FilePlus2 />
             <span className="ml-2">Nouveau</span>
           </button>
         </div>
       </div>
 
-      {/* === Modal === */}
-      {/*       {openModal && <AddOwner setOpenModal={setOpenModal} />}
-      {openModalEdit && (
-        <EditOwner setOpenModalEdit={setOpenModalEdit} id={selectedOwnerId} />
-      )}
-      {openModalDetails && (
-        <DetailsOwner
-          setOpenModalDetails={setOpenModalDetails}
-          id={selectedOwnerId}
-        />
-      )} */}
-
-      {owners?.length > 0 ? (
+      {promoters?.length > 0 ? (
         <div className="col-span-full xl:col-span-8 bg-white dark:bg-gray-800 shadow-sm rounded-xl">
           <div className="p-3">
             {/* 🔍 Barre de recherche + Tri */}
@@ -141,7 +128,7 @@ const ListOwner = () => {
             >
               <input
                 type="text"
-                placeholder="Rechercher un owner..."
+                placeholder="Rechercher un promoteur..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-72 p-2 border rounded-lg outline-none"
@@ -162,7 +149,7 @@ const ListOwner = () => {
                       <ChevronsUpDown className="h-4 w-4 text-gray-500" />
                     </Listbox.Button>
                     <Listbox.Options className="absolute mt-1 w-full bg-white dark:bg-gray-700 rounded-lg shadow-lg z-50">
-                      {sortFieldOptions.map((opt) => (
+                      {sortFields.map((opt) => (
                         <Listbox.Option
                           key={opt.value}
                           value={opt}
@@ -179,7 +166,32 @@ const ListOwner = () => {
                   </div>
                 </Listbox>
               </div>
-
+{ /* tri by sex */ }
+ <div className="relative w-48">
+                <Listbox value={gender} onChange={setGender}>
+                  <div className="relative">
+                    <Listbox.Button className="w-full flex justify-between items-center p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white">
+                      {gender.label}
+                      <ChevronsUpDown className="h-4 w-4 text-gray-500" />
+                    </Listbox.Button>
+                    <Listbox.Options className="absolute mt-1 w-full bg-white dark:bg-gray-700 rounded-lg shadow-lg z-50">
+                      {genders.map((opt) => (
+                        <Listbox.Option
+                          key={opt.value}
+                          value={opt}
+                          className="cursor-pointer select-none p-2 hover:bg-gray-100 dark:hover:bg-gray-600"
+                        >
+                          {({ selected }) => (
+                            <span className={selected ? "font-semibold" : ""}>
+                              {opt.label}
+                            </span>
+                          )}
+                        </Listbox.Option>
+                      ))}
+                    </Listbox.Options>
+                  </div>
+                </Listbox>
+              </div>
               {/* Ordre */}
               <button
                 type="button"
@@ -197,54 +209,57 @@ const ListOwner = () => {
                   <tr>
                     <th className="p-2 text-left">N°</th>
                     <th className="p-2 text-left">Nom</th>
-                    <th className="p-2 text-center">Identifiant</th>
-                    <th className="p-2 text-center">Rôle utilisateur</th>
+                    <th className="p-2 text-center">Postnom</th>
+                    <th className="p-2 text-center">prenom</th>
+                    <th className="p-2 text-center">Sexe</th>
+                    <th className="p-2 text-center">Phone</th>
+                    <th className="p-2 text-center">E-mail</th>
                     <th className="p-2 text-center">Status</th>
                     <th className="p-2 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="text-sm font-medium divide-y divide-gray-100 dark:divide-gray-700/60">
-                  {owners?.map((item, i) => (
+                  {promoters?.map((item, i) => (
                     <tr key={item._id}>
                       <td className="p-2">{i + 1}</td>
                       <td className="p-2">{item.name}</td>
-                      <td className="p-2 text-center">{item.username}</td>
-                      <td className="p-2 text-center">{item.role}</td>
-                      <td className="p-2 text-center">{item.isLocked == true ?(<span className=" text-red-600">Désactivé</span>) : (<span className=" text-green-800">Actif</span>)}</td>
+                      <td className="p-2 text-center">{item.lastname}</td>
+                      <td className="p-2 text-center">{item.firstname}</td>
+                      <td className="p-2 text-center">{item.gender}</td>
+                      <td className="p-2 text-center">{item.phone}</td>
+                      <td className="p-2 text-center">{item.email}</td>
+                      <td className="p-2 text-center">
+                        {item?.iaccount?.sLocked == true ? (
+                          <span className=" text-red-600">Désactivé</span>
+                        ) : (
+                          <span className=" text-green-800">Actif</span>
+                        )}
+                      </td>
 
                       <td className="p-2">
                         <div className="flex justify-center space-x-2">
                           <Pencil
                             className="cursor-pointer text-blue-600"
                             /*    onClick={() => {
-                              setSelectedOwnerId(item._id); // on stocke l'id du owner
-                              setOpenModalEdit(true); // on ouvre le modal édition
-                            }} */
+                                                   setSelectedOwnerId(item._id); // on stocke l'id du owner
+                                                   setOpenModalEdit(true); // on ouvre le modal édition
+                                                 }} */
                             onClick={() => navigate(`/edit-owner/${item._id}`)}
                           />
                           <Eye
                             className="cursor-pointer text-yellow-600"
-                            /* onClick={() => {
-                              setSelectedOwnerId(item._id); // on stocke l'id du owner
-                              setOpenModalDetails(true); // on ouvre le modal édition
-                            }} */
                             onClick={() =>
-                              navigate(`/details-owner/${item._id}`)
+                              navigate(`/details-promoter/${item._id}`)
                             }
                           />
                           {item.isLocked == true ? (
                             <LockOpen
-                              onClick={() =>
-                               toogleOwner(item._id)
-                              }
+                              onClick={() => toogleOwner(item._id)}
                               className="cursor-pointer text-red-600"
                             />
                           ) : (
                             <LockOpen
-                              onClick={() =>
-                                toogleOwner(item._id)
-                               
-                              }
+                              onClick={() => toogleOwner(item._id)}
                               className="cursor-pointer text-green-600"
                             />
                           )}
@@ -298,4 +313,4 @@ const ListOwner = () => {
   );
 };
 
-export default ListOwner;
+export default Promoter;

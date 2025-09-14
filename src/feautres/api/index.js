@@ -38,3 +38,10 @@ export const getOwner = (id) => API.get(`/api/owner/${id}`)
 export const updateOwner = (formData, id) => API.patch(`/api/owner/${id}`, formData);
 export const addNewOnwer = (formData) => API.post('/api/owner/add', formData)
 export const toogleOwner = (id) => API.patch(`/api/owner/toggle/${id}`);
+
+
+//Rooter for promoter
+export const addPromoter = (formData) => API.post('/api/promoter', formData)
+export const fetchAllPromoters = (params) => API.get(`/api/promoter/all`, { params })
+export const getPromoter = (id) => API.get(`/api/promoter/${id}`)
+export const promoterOwner = (formData, id) => API.patch(`/api/promoter/${id}`, formData);

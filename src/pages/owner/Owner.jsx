@@ -25,7 +25,6 @@ const Owner = () => {
   const [sortField, setSortField] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
 
-  console.log("liste des utilisateurs :", owners?.owners);
   useEffect(() => {
     //dispatch(getAllOwners());
     dispatch(fetchAll({ page: 1, limit: 10, search: "" }));
@@ -73,7 +72,7 @@ const Owner = () => {
         {/* Left: Title */}
         <div className="mb-4 sm:mb-0">
           <h1 className="text-2xl md:text-3xl text-sky-800 dark:text-gray-100 font-bold">
-            Liste des Utilisateurs
+            Liste des Utilisateursx
           </h1>
         </div>
         {/* Barre de recherche */}
@@ -89,7 +88,7 @@ const Owner = () => {
                 }}
               />
 
-              <span className="max-xs:sr-only"> &nbsp; Nouveau</span>
+              <span className="max-xs:sr-only"> &nbsp; Nouveaux</span>
             </button>
           </NavLink>
         </div>

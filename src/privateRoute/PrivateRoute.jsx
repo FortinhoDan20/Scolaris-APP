@@ -14,7 +14,7 @@ import { Navigate } from 'react-router-dom';
 const PrivateRoute = ({children, roles }) => {
     const { auth } = useSelector((state) => ({ ...state}))
   const ownerRole = auth?.owner?.owner.role
-  console.log("auth connected :", ownerRole)
+  console.log("auth connected :", auth)
 
   // Si pas d'utilisateur, on redirige vers la page de connexion
   if (!auth) {

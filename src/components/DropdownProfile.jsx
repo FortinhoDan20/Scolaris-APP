@@ -8,6 +8,8 @@ import { setLogout } from "../feautres/auth/authSlice";
 
 const connected = JSON.parse(localStorage.getItem("profile"));
 
+console.log("object connected :", connected?.owner?.name)
+
 function DropdownProfile({ align }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dispatch = useDispatch();

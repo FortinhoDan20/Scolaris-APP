@@ -10,7 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import MainLayout from "./layout/MainLayout";
 import SignIn from "./pages/auth/SignIn";
 import { ToastContainer } from "react-toastify";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setOwner } from "./feautres/auth/authSlice";
 import PrivateRoute from "./privateRoute/PrivateRoute";
 import Forbidden403 from "./pages/errors/Forbidden403";
@@ -22,9 +22,11 @@ import EditOwner from "./pages/owner/modal/EditOwner";
 import AddPromoter from "./pages/promoter/AddPromoter";
 import Promoter from "./pages/promoter/Promoter";
 import TabSchool from "./pages/school/TabSchool";
+import DetailsPromoter from "./pages/promoter/DetailsPromoter";
 
 function App() {
   const location = useLocation();
+   const { auth } = useSelector((state) => ({ ...state}))
   const connected = JSON.parse(localStorage.getItem("profile"));
   const dispatch = useDispatch();
 
@@ -33,6 +35,8 @@ function App() {
     window.scroll({ top: 0 });
     document.querySelector("html").style.scrollBehavior = "";
   }, [location.pathname]); // triggered on route change
+
+  console.log("auth :", !auth.owner ? ("vide"):("connecters") )
 
     // Restaure l'utilisateur connecté depuis le localStorage
     useEffect(() => {
@@ -44,17 +48,19 @@ function App() {
     <>
      <ToastContainer />
       <Routes>
-        <Route path="/" element={<PrivateRoute><MainLayout /></PrivateRoute>}>
-          <Route index element={<Dashboard />} />
-          <Route path="/list-users" element={<PrivateRoute ><ListOwner /></PrivateRoute>}/>
-          <Route path="/new-owner" element={<PrivateRoute ><AddOwner /></PrivateRoute>}/>
-           <Route path="/details-owner/:id" element={<PrivateRoute ><DetailsOwner /></PrivateRoute>}/>
-           <Route path="/edit-owner/:id" element={<PrivateRoute ><EditOwner /></PrivateRoute>}/>
-           <Route path="/add-owner/" element={<PrivateRoute ><AddOwner /></PrivateRoute>}/>
-           <Route path="/new-promoter/" element={<PrivateRoute ><AddPromoter /></PrivateRoute>}/>
-           <Route path="/list-promoter/" element={<PrivateRoute ><Promoter /></PrivateRoute>}/>
-           <Route path="/details-school/" element={<PrivateRoute ><TabSchool /></PrivateRoute>}/>
+        <Route path="/" element={!auth.owner ?  <SignIn/> :  <MainLayout />}>
+          <Route index element={!auth.owner ?  <SignIn/> : <Dashboard />} />
+          <Route path="/list-users" element={<ListOwner />}/>
+          <Route path="/new-owner" element={!auth.owner ?  <SignIn/> : <AddOwner />}/>
+           <Route path="/details-owner/:id" element={!auth.owner ?  <SignIn/> : <DetailsOwner />}/>
+           <Route path="/edit-owner/:id" element={!auth.owner ?  <SignIn/> : <EditOwner />}/>
+           <Route path="/add-owner/" element={!auth.owner ?  <SignIn/> : <AddOwner />}/>
+           <Route path="/new-promoter/" element={!auth.owner ?  <SignIn/> : <AddPromoter />}/>
+           <Route path="/list-promoter/" element={!auth.owner ?  <SignIn/> : <Promoter />}/>
+           <Route path="/details-promoter/:id" element={!auth.owner ?  <SignIn/> : <DetailsPromoter />}/>
+           <Route path="/details-school/" element={!auth.owner ?  <SignIn/> : <TabSchool />}/>
         </Route>
+
         <Route path="/403" element={<Forbidden403 />} />
         <Route path="/login" element={<SignIn />}></Route>
       </Routes>
