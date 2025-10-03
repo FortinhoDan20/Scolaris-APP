@@ -3,12 +3,14 @@ import { Link } from "react-router-dom";
 import Transition from "../utils/Transition";
 
 import UserAvatar from "../images/user-avatar-32.png";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setLogout } from "../feautres/auth/authSlice";
+
 
 const connected = JSON.parse(localStorage.getItem("profile"));
 
-console.log("object connected :", connected?.owner?.name)
+
+
 
 function DropdownProfile({ align }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -16,6 +18,7 @@ function DropdownProfile({ align }) {
 
   const trigger = useRef(null);
   const dropdown = useRef(null);
+  const { owner } = useSelector((state) => state.auth)
 
   // close on click outside
   useEffect(() => {
@@ -65,7 +68,7 @@ function DropdownProfile({ align }) {
         />
         <div className="flex items-center truncate">
           <span className="truncate ml-2 text-sm font-medium text-gray-600 dark:text-gray-100 group-hover:text-gray-800 dark:group-hover:text-white">
-            {connected?.owner?.name}
+            {owner?.owner?.name}
           </span>
           <svg
             className="w-3 h-3 shrink-0 ml-1 fill-current text-gray-400 dark:text-gray-500"
@@ -95,11 +98,11 @@ function DropdownProfile({ align }) {
         >
           <div className="pt-0.5 pb-2 px-3 mb-1 border-b border-gray-200 dark:border-gray-700/60">
             <div className="font-medium text-gray-800 dark:text-gray-50">
-              {connected?.owner?.username}{" "}
+              {owner?.owner?.name}{" "}
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400 italic">
               {" "}
-              {connected?.owner?.isAdmin === true ? (
+              {owner?.owner?.role === "admin" ? (
                 <> Administrator</>
               ) : (
                 <>Associate</>

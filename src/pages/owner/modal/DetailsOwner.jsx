@@ -1,105 +1,131 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
-import { Loader2, ArrowLeft, User } from "lucide-react";
+import { User, AtSign, Calendar, ShieldCheck } from "lucide-react";
+import { motion } from "framer-motion";
 import { getOwner } from "../../../feautres/owner/ownerSlice";
+
+const SkeletonCard = () => (
+  <div className="p-6 bg-gray-200 dark:bg-gray-700 rounded-lg shadow animate-pulse mb-8">
+    <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded w-1/3 mb-4"></div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {[...Array(6)].map((_, i) => (
+        <div key={i} className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-full"></div>
+      ))}
+    </div>
+  </div>
+);
+
+const SkeletonTable = () => (
+  <div className="p-6 bg-gray-200 dark:bg-gray-700 rounded-lg shadow animate-pulse">
+    <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded w-1/4 mb-4"></div>
+    <div className="space-y-2">
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="h-4 bg-gray-300 dark:bg-gray-600 rounded w-full"></div>
+      ))}
+    </div>
+  </div>
+);
+
 const DetailsOwner = () => {
-   const { id } = useParams();
+  const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const { owner, loading, error } = useSelector((state) => state.owner);
 
-   useEffect(() => {
-    if (id) {
-      dispatch(getOwner(id));
-    }
+  useEffect(() => {
+    if (id) dispatch(getOwner(id));
   }, [id, dispatch]);
-  return (
-     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 py-10 px-6">
-      <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b pb-4 mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-            <User className="w-6 h-6 text-blue-500" />
-            Détails du propriétaire
-          </h1>
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-1 text-gray-600 dark:text-gray-300 hover:text-blue-600 transition"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Retour
-          </button>
-        </div>
 
-        {/* Loading */}
-        {loading && (
-          <div className="flex justify-center items-center py-10">
-            <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
-          </div>
-        )}
-
-        {/* Error */}
-        {error && (
-          <div className="text-center text-red-500 font-medium py-4">
-            {error}
-          </div>
-        )}
-
-        {/* Informations */}
-        {!loading && owner && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Nom</p>
-              <p className="text-lg font-semibold text-gray-800 dark:text-white">
-                {owner.name || "Non renseigné"}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
-              <p className="text-lg font-semibold text-gray-800 dark:text-white">
-                {owner.email || "Non renseigné"}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Nom d'utilisateur</p>
-              <p className="text-lg font-semibold text-gray-800 dark:text-white">
-                {owner.username || "Non renseigné"}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Rôle</p>
-              <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700 dark:bg-blue-700 dark:text-white">
-                {owner.role || "Non défini"}
-              </span>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Créé le</p>
-              <p className="text-lg font-semibold text-gray-800 dark:text-white">
-                {owner.createdAt
-                  ? new Date(owner.createdAt).toLocaleDateString()
-                  : "N/A"}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Mis à jour</p>
-              <p className="text-lg font-semibold text-gray-800 dark:text-white">
-                {owner.updatedAt
-                  ? new Date(owner.updatedAt).toLocaleDateString()
-                  : "N/A"}
-              </p>
-            </div>
-          </div>
-        )}
+  if (loading)
+    return (
+      <div className="p-6 space-y-6 min-h-screen bg-gray-50 dark:bg-gray-900">
+        <SkeletonCard />
+        <SkeletonTable />
       </div>
-    </div>
-  )
-}
+    );
 
-export default DetailsOwner
+  if (error)
+    return <div className="text-center text-red-500 font-medium py-10">{error}</div>;
+
+  if (!owner)
+    return <div className="text-center mt-10">Aucune donnée trouvée</div>;
+
+  const infoItems = [
+    { icon: <User className="w-5 h-5 text-blue-500" />, label: "Nom", value: owner.name },
+    { icon: <AtSign className="w-5 h-5 text-green-500" />, label: "Email", value: owner.email },
+    { icon: <User className="w-5 h-5 text-purple-500" />, label: "Nom d'utilisateur", value: owner.username },
+    { icon: <ShieldCheck className="w-5 h-5 text-pink-500" />, label: "Rôle", value: owner.role },
+    { icon: <Calendar className="w-5 h-5 text-yellow-500" />, label: "Créé le", value: owner.createdAt ? new Date(owner.createdAt).toLocaleDateString() : "-" },
+    { icon: <Calendar className="w-5 h-5 text-red-500" />, label: "Mis à jour", value: owner.updatedAt ? new Date(owner.updatedAt).toLocaleDateString() : "-" },
+  ];
+
+  return (
+    <div className="p-6 min-h-screen bg-gray-50 dark:bg-gray-900">
+      <button
+        onClick={() => navigate(-1)}
+        className="mb-6 px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition"
+      >
+        Retour
+      </button>
+
+      {/* Carte principale */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6 mb-8"
+      >
+        <h2 className="text-2xl font-semibold mb-4">Détails du propriétaire</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {infoItems.map((item, index) => (
+            <div
+              key={index}
+              className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-700 rounded hover:bg-gray-100 dark:hover:bg-gray-600 transition"
+            >
+              {item.icon}
+              <span className="font-medium">{item.label}:</span> <span>{item.value || "-"}</span>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Tableau des autres infos */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+        className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6"
+      >
+        <h3 className="text-xl font-semibold mb-4">Autres informations</h3>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-700">
+              <tr>
+                <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300">Champ</th>
+                <th className="px-4 py-2 text-left text-sm font-medium text-gray-500 dark:text-gray-300">Valeur</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                <td className="px-4 py-2">Adresse</td>
+                <td className="px-4 py-2">{owner.address || "-"}</td>
+              </tr>
+              <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                <td className="px-4 py-2">Téléphone</td>
+                <td className="px-4 py-2">{owner.phone || "-"}</td>
+              </tr>
+              <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                <td className="px-4 py-2">Société</td>
+                <td className="px-4 py-2">{owner.company || "-"}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+export default DetailsOwner;

@@ -1,24 +1,27 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import * as api from "../api";
 import { toast } from "react-toastify";
+import { CloudCog } from "lucide-react";
 
+// Ajouter un promoteur
 export const addPromoter = createAsyncThunk(
-  "add/owner",
-  async ({ formData, navigate, toast }, { rejectWithValaue }) => {
-    const response = await api.addPromoter(formData);
-
-    if (response) {
-      toast.success(response.data.message);
-      return response.data;
-    } else {
-      toast.error(response.error);
-      return rejectWithValaue(error.message);
+  "promoter/addPromoter",
+  async (formData, { rejectWithValue }) => {
+    try {
+      const response = await api.newPromoter(formData);
+      if (response.data) {
+       // toast.success(response.data.message || "Promoteur ajouté avec succès !");
+        return response.data;
+      }
+      return rejectWithValue("Erreur lors de l'ajout du promoteur");
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
   }
 );
 
 export const fetchAllPromoters = createAsyncThunk(
-  "owners/fetchAll",
+  "promoter/fetchAll",
   async (params, { rejectWithValue }) => {
     const {
       page = 1,
@@ -28,6 +31,7 @@ export const fetchAllPromoters = createAsyncThunk(
       sortOrder = "asc",
       gender
     } = params || {};
+    console.log("params promoter :", params)
     try {
       const response = await api.fetchAllPromoters({
         page,
@@ -64,6 +68,7 @@ export const promoterUpdated = createAsyncThunk(
   async ({ id, formData }, { rejectWithValaue }) => {
     const response = await api.promoterOwner(formData, id);
 
+
     if (response) {
       // toast.success(response.data.message )
       return response.data;
@@ -79,6 +84,7 @@ const promoterSlice = createSlice({
   initialState: {
     promoter: {},
     promoters: [],
+    schools:[],
     page: 1,
     limit: 10,
     total: 0,
@@ -112,7 +118,9 @@ const promoterSlice = createSlice({
         })
         .addCase(getPromoter.fulfilled, (state, action) => {
           state.loading = false;
-          state.promoter = action.payload.promoter || action.payload;
+          state.promoter = action.payload.promoter
+          state.schools = action.payload.schools
+
         })
         .addCase(getPromoter.rejected, (state, action) => {
           state.loading = false;
@@ -141,25 +149,21 @@ const promoterSlice = createSlice({
           state.error = action.payload || action.error.message || "Whoops!";
           toast.error(state.error);
         })
-        // === add new owner ===
-        .addCase(addPromoter.pending, (state) => {
-          state.loading = true;
-        })
-        .addCase(addPromoter.fulfilled, (state, action) => {
-          state.loading = false;
-          state.promoter = action.payload.promoter || action.payload;
-  
-          // Met à jour la liste locale si besoin
-          const index = state.owners.findIndex((o) => o._id === state.owner._id);
-          if (index !== -1) {
-            state.owners[index] = state.owner;
-          }
-        })
-        .addCase(addPromoter.rejected, (state, action) => {
-          state.loading = false;
-          state.error = action.payload || action.error.message || "Whoops!";
-          toast.error(state.error);
-        })
+             // --- addPromoter ---
+      .addCase(addPromoter.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addPromoter.fulfilled, (state, action) => {
+        state.loading = false;
+        state.promoter = action.payload.promoter || action.payload;
+        state.promoters.unshift(state.promoter); // Ajouter au début de la liste
+      })
+      .addCase(addPromoter.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || action.error.message;
+        toast.error(state.error);
+      })
       
     },
 });
